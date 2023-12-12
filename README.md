@@ -29,6 +29,8 @@ Existen dos algoritmos desarollados en C++ los cuales son similares pero poseen 
 > [!WARNING]
 > El algoritmo calibration.cpp posee un problema cuando un robot sale o entra al ROI, deteniendo el codigo. Como recomendación no se deben salir de la cancha, y si se quiere ingresar, que sea con la mano encima.
 
+Para simular de servidor, existe el archivo server.py, el cual se inicia con una IP y puerto establecidos en el archivo de configuracion config.json. En primera instancia se debe iniciar el servidor y luego el algoritmo de envío de datos, ya que si fuese el caso opuesto, el codigo lanzaría un error.
+
 ## Camara
 Este algoritmo está desarrollado con la camara C922 PRO de Logitech, la cual entrega una resolución maxima de 1920x1080 a 30 FPS en el entorno de Ubuntu. Adicionalmente, esta camara no es configurable en ese entorno (brillo, saturación, etc) por lo que se opta a utilizar el software Logitech G HUB y configurar la camara con estos parametros:
 
