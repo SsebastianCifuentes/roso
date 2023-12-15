@@ -184,6 +184,7 @@ int main() {
     // Permite al usuario seleccionar un área de interés (ROI)
     cv::Rect roi = cv::selectROI("Detección de Círculos", frame);
     cv::destroyWindow("Detección de Círculos");
+    cv::waitKey(1);
 
     // Permite realizar el conteo de FPS
     int frames = 0;
