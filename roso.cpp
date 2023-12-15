@@ -132,7 +132,7 @@ bool send_message_to_server(const std::string& host, const std::string& port, co
         // Envia el mensaje al servidor
         socket.send_to(boost::asio::buffer(message), *endpoints.begin());
         
-        std::cout << "Mensaje enviado por UDP: " << message << std::endl;
+        std::cout << "Mensaje enviado por UDP:" << "\n\n" << message << std::endl;
         return true;
     }
     catch (std::exception& e) {
@@ -324,7 +324,7 @@ int main() {
 
         // Enviar mensaje al servidor usando UDP
         if (send_message_to_server(params.IP, params.PORT, buffer.str())) {
-            std::cout << "Coordenadas enviadas" << std::endl;
+            std::cout << "Coordenadas enviadas exitosamente" << std::endl;
         } else {
             std::cout << "No se pudo enviar las coordenadas al servidor" << std::endl;
         }
