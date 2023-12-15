@@ -14,8 +14,8 @@ def start_udp_server(host, port):
 
     while True:
         data, addr = udp_socket.recvfrom(1024)  # Tamaño del buffer
-        formatted_data = data.decode('utf-8') + '\n'  # Agregar salto de línea al final
-        print(f"Mensaje recibido de {addr}: {formatted_data}")
+        formatted_data = data.decode('utf-8')
+        print(f"Mensaje recibido de {addr}:\n\n{formatted_data}")
 
 if __name__ == "__main__":
     config = load_config()
