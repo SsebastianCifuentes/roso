@@ -1,0 +1,2 @@
+# Hashes of file build rules.
+cff5401a4ef254fb9cdec119dcc7ad89 /home/robosoccer/roso/src/detection.pb.cc

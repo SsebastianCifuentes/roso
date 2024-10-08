@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package detection;
+
+// Mensaje para un objeto detectado (robot o pelota)
+message DetectedObject {
+  enum ObjectType {
+    ROBOT = 0;
+    BALL = 1;
+  }
+  ObjectType type = 1;
+  float x = 2;
+  float y = 3;
+  float angle = 4; // Solo para robots
+  int32 team = 5;  // 0: Desconocido, 1: Rojo, 2: Azul
+  int32 id = 6;    // ID del jugador: 1, 2, 3
+}

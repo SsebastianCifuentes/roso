@@ -1,0 +1,88 @@
+# Archivo de configuración de parametros
+
+camera:
+  width: 1280
+  height: 720
+  fps: 30
+  format: 'MJPG'  # Formato de captura: 'MJPG' o 'YUYV'
+
+  # Parámetros de control de imagen
+  brightness: 140          # Brillo 
+  contrast: 180           # Contraste 
+  saturation: 255         # Saturación 
+  sharpness: 200          # Nitidez 
+  gain: 0                 # Ganancia 
+  backlight_compensation: 0  # Compensación de luz de fondo
+
+  # Parámetros de balance de blancos
+  auto_white_balance: false  
+  white_balance: 4500     # Temperatura de color 
+
+  # Parámetros de exposición
+  auto_exposure: 1       # Modo de exposición: 1 (manual), 3 (aperture priority)
+  exposure: 250          # Valor de exposición manual cuando `auto_exposure` está en 0
+  
+  # Parámetros de enfoque
+  auto_focus: false       
+  focus: 0                # Valor de enfoque
+
+network:
+  multicast_address: "239.255.0.1"  # Dirección multicast para enviar los datos
+  port: "5000"                     # Puerto para enviar los datos
+
+roi:
+  x: 120      # Coordenada X del ROI
+  y: 40      # Coordenada Y del ROI
+  width: 1022   # Ancho del ROI
+  height: 680  # Alto del ROI
+
+color:
+  red:
+    lower: [0, 130, 150]
+    upper: [5, 255, 255]
+    lower2: [175, 150, 180]
+    upper2: [179, 255, 255]
+  blue:
+    lower: [110, 150, 50]
+    upper: [120, 255, 255]
+  yellow:
+    lower: [25, 80, 180]
+    upper: [35, 255, 255]
+  green:
+    lower: [40, 80, 150]
+    upper: [85, 255, 255]
+  skyblue:
+    lower: [95, 160, 200]
+    upper: [110, 255, 255]
+  orange:
+    lower: [5, 140, 200]
+    upper: [23, 255, 255]
+  white:
+    lower: [90, 10, 200]
+    upper: [105, 120, 255]
+
+hough:
+  dp: 1.0
+  min_dist: 30
+  param1_big: 50
+  param2_big: 15
+  min_radius_big: 25
+  max_radius_big: 30
+  param1_small: 10
+  param2_small: 5
+  min_radius_small: 5
+  max_radius_small: 10
+  param1_ball: 50
+  param2_ball: 10
+  min_radius_ball: 7
+  max_radius_ball: 12
+
+gaussian:
+  kernel_size_big: 7
+  kernel_size_medium: 5
+  kernel_size_small: 5
+  sigma: 2.0
+
+font_size:
+  scale: 0.35
+  thickness: 1

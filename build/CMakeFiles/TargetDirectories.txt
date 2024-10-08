@@ -1,0 +1,5 @@
+/home/robosoccer/roso/build/CMakeFiles/roso.dir
+/home/robosoccer/roso/build/CMakeFiles/calibration.dir
+/home/robosoccer/roso/build/CMakeFiles/receiver.dir
+/home/robosoccer/roso/build/CMakeFiles/edit_cache.dir
+/home/robosoccer/roso/build/CMakeFiles/rebuild_cache.dir
