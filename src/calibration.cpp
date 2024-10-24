@@ -1,20 +1,20 @@
-/*  COMPUTER VISION PROJECT FOR THE ROBOSOCCER 2023 COURSE
+/*  PROYECTO DE VISIÓN POR COMPUTADOR PARA ROBOCUP SOCCER 2024
 
-    AUTHOR: SEBASTIÁN CIFUENTES PÉREZ
-    ADVISOR PROFESSOR: DANIEL YUNGE
-    CO-ADVISOR: GUILLERMO CID
+    AUTOR: SEBASTIÁN CIFUENTES PÉREZ
+    PROFESOR GUÍA: DANIEL YUNGE
+    PROFESOR CO-GUÍA: GUILLERMO CID
 
-    This code is responsible for real-time robot detection
-    and visualization of the detection performed for subsequent
-    calibration of colors or sizes.
+    Este código se encarga de la detección en tiempo real de robots
+    y la visualización de la detección realizada para posterior
+    calibración de colores o tamaños.
 
-    The HoughCircles parameters are adapted to the conditions
-    of the LabSens laboratory, with constant white lighting, using
-    the Logitech C922 camera located at 2 meters above the field and
-    with circle diameters:
-    - Large: 110 mm
-    - Small: 30 mm
-    - Ball: 44 mm (Traditional ping pong ball)
+    Los parámetros de HoughCircles están adaptados a las condiciones
+    del laboratorio LabSens, con iluminación blanca constante, utilizando
+    la cámara Logitech C922 ubicada a 2 metros sobre el campo y
+    con diámetros de círculos:
+    - Grandes: 110 mm
+    - Pequeños: 30 mm
+    - Pelota: 44 mm (Pelota de ping pong tradicional)
 */
 
 #include <opencv2/opencv.hpp>
@@ -24,9 +24,9 @@
 #include <yaml-cpp/yaml.h>
 #include <omp.h>
 
-// Structure to store the parameters
+// Estructura para almacenar los parámetros
 struct DetectionParameters {
-    // Image control parameters
+    // Parámetros de control de imagen
     int CAMERA_WIDTH;
     int CAMERA_HEIGHT;
     int BRIGHTNESS;
@@ -52,7 +52,12 @@ struct DetectionParameters {
     cv::Scalar LOWER_ORANGE, UPPER_ORANGE;
     cv::Scalar LOWER_WHITE, UPPER_WHITE;
 
-    double DP, MIN_DIST;
+    double DP;
+    // Parámetros min_dist separados para cada tipo de círculo
+    double MIN_DIST_BIG;
+    double MIN_DIST_SMALL;
+    double MIN_DIST_BALL;
+
     int PARAM1_BIG, PARAM2_BIG, MIN_RADIUS_BIG, MAX_RADIUS_BIG;
     int PARAM1_SMALL, PARAM2_SMALL, MIN_RADIUS_SMALL, MAX_RADIUS_SMALL;
     int PARAM1_BALL, PARAM2_BALL, MIN_RADIUS_BALL, MAX_RADIUS_BALL;
@@ -61,7 +66,7 @@ struct DetectionParameters {
     float FONT_SCALE, TEXT_THICKNESS;
 };
 
-// Structure for color ranges
+// Estructura para rangos de color
 struct ColorRange {
     std::string name;
     cv::Scalar lower;
@@ -69,14 +74,14 @@ struct ColorRange {
     cv::Mat mask;
 };
 
-// Function to load parameters from a YAML file
+// Función para cargar parámetros desde un archivo YAML
 DetectionParameters loadParameters(const std::string& filename) {
     DetectionParameters params;
 
     try {
         YAML::Node config = YAML::LoadFile(filename);
 
-        // Camera parameters
+        // Parámetros de la cámara
         params.CAMERA_WIDTH = config["camera"]["width"].as<int>();
         params.CAMERA_HEIGHT = config["camera"]["height"].as<int>();
         params.BRIGHTNESS = config["camera"]["brightness"].as<int>();
@@ -94,7 +99,7 @@ DetectionParameters loadParameters(const std::string& filename) {
         params.FPS = config["camera"]["fps"].as<int>();
         params.FORMAT = config["camera"]["format"].as<std::string>();
 
-        // Color definitions
+        // Definiciones de colores
         params.LOWER_RED = cv::Scalar(config["color"]["red"]["lower"][0].as<int>(), config["color"]["red"]["lower"][1].as<int>(), config["color"]["red"]["lower"][2].as<int>());
         params.UPPER_RED = cv::Scalar(config["color"]["red"]["upper"][0].as<int>(), config["color"]["red"]["upper"][1].as<int>(), config["color"]["red"]["upper"][2].as<int>());
         params.LOWER_RED2 = cv::Scalar(config["color"]["red"]["lower2"][0].as<int>(), config["color"]["red"]["lower2"][1].as<int>(), config["color"]["red"]["lower2"][2].as<int>());
@@ -118,9 +123,13 @@ DetectionParameters loadParameters(const std::string& filename) {
         params.LOWER_WHITE = cv::Scalar(config["color"]["white"]["lower"][0].as<int>(), config["color"]["white"]["lower"][1].as<int>(), config["color"]["white"]["lower"][2].as<int>());
         params.UPPER_WHITE = cv::Scalar(config["color"]["white"]["upper"][0].as<int>(), config["color"]["white"]["upper"][1].as<int>(), config["color"]["white"]["upper"][2].as<int>());
 
-        // HoughCircles parameters
+        // Parámetros de HoughCircles
         params.DP = config["hough"]["dp"].as<double>();
-        params.MIN_DIST = config["hough"]["min_dist"].as<double>();
+
+        // Nuevos parámetros min_dist para cada tipo de círculo
+        params.MIN_DIST_BIG = config["hough"]["min_dist_big"].as<double>();
+        params.MIN_DIST_SMALL = config["hough"]["min_dist_small"].as<double>();
+        params.MIN_DIST_BALL = config["hough"]["min_dist_ball"].as<double>();
 
         params.PARAM1_BIG = config["hough"]["param1_big"].as<int>();
         params.PARAM2_BIG = config["hough"]["param2_big"].as<int>();
@@ -153,7 +162,7 @@ DetectionParameters loadParameters(const std::string& filename) {
     return params;
 }
 
-// Function to initialize color ranges
+// Función para inicializar rangos de color
 void initializeColorRanges(const DetectionParameters& params, std::vector<ColorRange>& colorRanges) {
     colorRanges.push_back({"RED1", params.LOWER_RED, params.UPPER_RED, cv::Mat()});
     colorRanges.push_back({"RED2", params.LOWER_RED2, params.UPPER_RED2, cv::Mat()});
@@ -165,7 +174,7 @@ void initializeColorRanges(const DetectionParameters& params, std::vector<ColorR
     colorRanges.push_back({"WHITE", params.LOWER_WHITE, params.UPPER_WHITE, cv::Mat()});
 }
 
-// Configure the camera with the loaded parameters
+// Configurar la cámara con los parámetros cargados
 void configureCamera(cv::VideoCapture& cap, const DetectionParameters& params) {
     cap.set(cv::CAP_PROP_FRAME_WIDTH, params.CAMERA_WIDTH);
     cap.set(cv::CAP_PROP_FRAME_HEIGHT, params.CAMERA_HEIGHT);
@@ -193,7 +202,7 @@ void configureCamera(cv::VideoCapture& cap, const DetectionParameters& params) {
     cap.set(cv::CAP_PROP_FOCUS, params.FOCUS);
 }
 
-// Initialize the camera
+// Inicializar la cámara
 bool initializeCamera(cv::VideoCapture& cap, const DetectionParameters& params) {
     cap.open(0, cv::CAP_V4L2);
     if (!cap.isOpened()) {
@@ -204,7 +213,7 @@ bool initializeCamera(cv::VideoCapture& cap, const DetectionParameters& params) 
     return true;
 }
 
-// Capture a frame from the camera
+// Capturar un frame de la cámara
 bool captureFrame(cv::VideoCapture& cap, cv::Mat& frame) {
     cap >> frame;
     if (frame.empty()) {
@@ -214,33 +223,33 @@ bool captureFrame(cv::VideoCapture& cap, cv::Mat& frame) {
     return true;
 }
 
-// Select the region of interest (ROI)
+// Seleccionar la región de interés (ROI)
 cv::Rect selectROI(const cv::Mat& frame) {
     cv::Rect roi = cv::selectROI("Select ROI", frame);
     cv::destroyWindow("Select ROI");
     return roi;
 }
 
-// Process the image to detect colors and perform transformations
+// Procesar la imagen para detectar colores y realizar transformaciones
 void processFrame(const cv::Mat& roiFrame, const DetectionParameters& params,
                   std::vector<ColorRange>& colorRanges,
                   cv::Mat& combinedSmallMask, cv::Mat& combinedBigMask, cv::Mat& mask_white) {
 
-    // Convert to HSV
+    // Convertir a HSV
     cv::Mat hsv;
     cv::cvtColor(roiFrame, hsv, cv::COLOR_BGR2HSV);
 
-    // Process each color in parallel
+    // Procesar cada color en paralelo
     #pragma omp parallel for
     for (int i = 0; i < static_cast<int>(colorRanges.size()); ++i) {
         cv::inRange(hsv, colorRanges[i].lower, colorRanges[i].upper, colorRanges[i].mask);
     }
 
-    // Combine red masks
+    // Combinar máscaras rojas
     cv::Mat mask_red;
     cv::bitwise_or(colorRanges[0].mask, colorRanges[1].mask, mask_red);
 
-    // Combine masks for small objects
+    // Combinar máscaras para objetos pequeños
     combinedSmallMask = cv::Mat::zeros(roiFrame.size(), CV_8UC1);
     combinedSmallMask += colorRanges[3].mask; // YELLOW
     combinedSmallMask += colorRanges[4].mask; // GREEN
@@ -248,35 +257,35 @@ void processFrame(const cv::Mat& roiFrame, const DetectionParameters& params,
     combinedSmallMask += colorRanges[6].mask; // ORANGE
     cv::GaussianBlur(combinedSmallMask, combinedSmallMask, cv::Size(params.KERNELSIZESMALL, params.KERNELSIZESMALL), params.SIGMA);
 
-    // Combine masks for large objects
+    // Combinar máscaras para objetos grandes
     combinedBigMask = cv::Mat::zeros(roiFrame.size(), CV_8UC1);
     combinedBigMask += mask_red;              // RED
     combinedBigMask += colorRanges[2].mask;   // BLUE
     cv::GaussianBlur(combinedBigMask, combinedBigMask, cv::Size(params.KERNELSIZEBIG, params.KERNELSIZEBIG), params.SIGMA);
 
-    // Process mask for the ball
+    // Procesar máscara para la pelota
     mask_white = colorRanges[7].mask; // WHITE
     cv::GaussianBlur(mask_white, mask_white, cv::Size(params.KERNELSIZEMEDIUM, params.KERNELSIZEMEDIUM), params.SIGMA);
 }
 
-// Detect large circles (teams)
+// Detectar círculos grandes (equipos)
 std::vector<cv::Vec3f> detectBigCircles(const cv::Mat& combinedBigMask, const DetectionParameters& params) {
     std::vector<cv::Vec3f> bigCircles;
-    cv::HoughCircles(combinedBigMask, bigCircles, cv::HOUGH_GRADIENT, params.DP, params.MIN_DIST, params.PARAM1_BIG, params.PARAM2_BIG, params.MIN_RADIUS_BIG, params.MAX_RADIUS_BIG);
+    cv::HoughCircles(combinedBigMask, bigCircles, cv::HOUGH_GRADIENT, params.DP, params.MIN_DIST_BIG, params.PARAM1_BIG, params.PARAM2_BIG, params.MIN_RADIUS_BIG, params.MAX_RADIUS_BIG);
     return bigCircles;
 }
 
-// Detect small circles (players) within a large circle
+// Detectar círculos pequeños (jugadores) dentro de un círculo grande
 std::vector<cv::Vec3f> detectSmallCircles(const cv::Mat& roiMask, const DetectionParameters& params) {
     std::vector<cv::Vec3f> smallCircles;
-    cv::HoughCircles(roiMask, smallCircles, cv::HOUGH_GRADIENT, params.DP, params.MIN_DIST, params.PARAM1_SMALL, params.PARAM2_SMALL, params.MIN_RADIUS_SMALL, params.MAX_RADIUS_SMALL);
+    cv::HoughCircles(roiMask, smallCircles, cv::HOUGH_GRADIENT, params.DP, params.MIN_DIST_SMALL, params.PARAM1_SMALL, params.PARAM2_SMALL, params.MIN_RADIUS_SMALL, params.MAX_RADIUS_SMALL);
     return smallCircles;
 }
 
-// Detect and label the ball
+// Detectar y etiquetar la pelota
 void detectAndLabelBall(const cv::Mat& mask_white, cv::Mat& roiFrame, const DetectionParameters& params) {
     std::vector<cv::Vec3f> whiteCircles;
-    cv::HoughCircles(mask_white, whiteCircles, cv::HOUGH_GRADIENT, params.DP, params.MIN_DIST, params.PARAM1_BALL, params.PARAM2_BALL, params.MIN_RADIUS_BALL, params.MAX_RADIUS_BALL);
+    cv::HoughCircles(mask_white, whiteCircles, cv::HOUGH_GRADIENT, params.DP, params.MIN_DIST_BALL, params.PARAM1_BALL, params.PARAM2_BALL, params.MIN_RADIUS_BALL, params.MAX_RADIUS_BALL);
     if (!whiteCircles.empty()) {
         cv::Point mediumCenter(cvRound(whiteCircles[0][0]), cvRound(whiteCircles[0][1]));
         int mediumRadius = cvRound(whiteCircles[0][2]);
@@ -286,11 +295,11 @@ void detectAndLabelBall(const cv::Mat& mask_white, cv::Mat& roiFrame, const Dete
     }
 }
 
-// Label the large and small circles
+// Etiquetar los círculos grandes y pequeños
 void labelObjects(const std::vector<cv::Vec3f>& bigCircles, const cv::Mat& combinedSmallMask, cv::Mat& roiFrame, const DetectionParameters& params,
                   const cv::Mat& mask_red, const cv::Mat& mask_blue, const std::vector<ColorRange>& colorRanges) {
 
-    // Create a copy of roiFrame to draw safely in parallel
+    // Crear una copia de roiFrame para dibujar de forma segura en paralelo
     cv::Mat roiFrameCopy = roiFrame.clone();
 
     #pragma omp parallel for
@@ -298,22 +307,22 @@ void labelObjects(const std::vector<cv::Vec3f>& bigCircles, const cv::Mat& combi
         cv::Point bigCenter(cvRound(bigCircles[i][0]), cvRound(bigCircles[i][1]));
         int bigRadius = cvRound(bigCircles[i][2]);
 
-        // Detect small circles within the large circle
+        // Detectar círculos pequeños dentro del círculo grande
         cv::Rect roiRect(bigCenter.x - bigRadius, bigCenter.y - bigRadius, bigRadius * 2, bigRadius * 2);
 
-        // Validate that the ROI is within the image boundaries
+        // Validar que el ROI esté dentro de los límites de la imagen
         if (roiRect.x < 0 || roiRect.y < 0 || roiRect.x + roiRect.width > combinedSmallMask.cols || roiRect.y + roiRect.height > combinedSmallMask.rows)
             continue;
 
         cv::Mat roiMask = combinedSmallMask(roiRect);
         std::vector<cv::Vec3f> smallCircles = detectSmallCircles(roiMask, params);
 
-        // If a small circle is found within the large circle, stop searching for more small circles
+        // Si se encuentra un círculo pequeño dentro del círculo grande
         if (!smallCircles.empty()) {
             cv::Point smallCenter(cvRound(smallCircles[0][0]), cvRound(smallCircles[0][1]));
             int smallRadius = cvRound(smallCircles[0][2]);
 
-            // Label the large and small circle
+            // Etiquetar el círculo grande y el pequeño
             std::string bigColor, smallColor;
             cv::Scalar teamColor, playerColor;
 
@@ -376,33 +385,35 @@ void labelObjects(const std::vector<cv::Vec3f>& bigCircles, const cv::Mat& combi
 
             std::string label = bigColor + ", " + smallColor;
 
-            // Drawing in critical section
+            // Dibujo en sección crítica
             #pragma omp critical
             {
                 cv::circle(roiFrameCopy, bigCenter, bigRadius, cv::Scalar(0, 255, 0), 2);
                 cv::circle(roiFrameCopy, cv::Point(bigCenter.x + smallCenter.x - bigRadius, bigCenter.y + smallCenter.y - bigRadius), smallRadius, cv::Scalar(0, 255, 0), 2);
 
                 size_t commaPos = label.find(", ");
-                cv::putText(roiFrameCopy, label.substr(0, commaPos), bigCenter, cv::FONT_HERSHEY_DUPLEX, params.FONT_SCALE, teamColor, params.TEXT_THICKNESS);
-                cv::putText(roiFrameCopy, label.substr(commaPos + 2), cv::Point(bigCenter.x, bigCenter.y + 20), cv::FONT_HERSHEY_DUPLEX, params.FONT_SCALE, playerColor, params.TEXT_THICKNESS);
+                if (commaPos != std::string::npos) {
+                    cv::putText(roiFrameCopy, label.substr(0, commaPos), bigCenter, cv::FONT_HERSHEY_DUPLEX, params.FONT_SCALE, teamColor, params.TEXT_THICKNESS);
+                    cv::putText(roiFrameCopy, label.substr(commaPos + 2), cv::Point(bigCenter.x, bigCenter.y + 20), cv::FONT_HERSHEY_DUPLEX, params.FONT_SCALE, playerColor, params.TEXT_THICKNESS);
+                }
             }
         }
     }
 
-    // Update roiFrame with the modified copy
+    // Actualizar roiFrame con la copia modificada
     roiFrame = roiFrameCopy;
 }
 
-// Display the image on screen
+// Mostrar la imagen en pantalla
 void displayFrame(const cv::Mat& frame) {
     cv::imshow("Circle Detection", frame);
     char key = cv::waitKey(1);
-    if (key == 27) {
-        exit(0);  // Exit if 'ESC' key is pressed
+    if (key == 27) { // Tecla ESC
+        exit(0);  // Salir si se presiona 'ESC'
     }
 }
 
-// Function to calculate and display FPS in the console
+// Función para calcular y mostrar FPS en la consola
 void calculateAndDisplayFPS(int& frames, std::chrono::steady_clock::time_point& start) {
     frames++;
     auto now = std::chrono::steady_clock::now();
@@ -416,8 +427,10 @@ void calculateAndDisplayFPS(int& frames, std::chrono::steady_clock::time_point& 
 }
 
 int main() {
+    // Cargar parámetros desde el archivo YAML
     DetectionParameters params = loadParameters("parameters.yaml");
 
+    // Inicializar la cámara
     cv::VideoCapture cap;
     if (!initializeCamera(cap, params)) {
         return 1;
@@ -428,21 +441,21 @@ int main() {
     bool roiDefined = false;
     bool windowCreated = false;
 
-    // Initialize color ranges
+    // Inicializar rangos de color
     std::vector<ColorRange> colorRanges;
     initializeColorRanges(params, colorRanges);
 
-    // Variables for FPS calculation
+    // Variables para el cálculo de FPS
     int frames = 0;
     auto start = std::chrono::steady_clock::now();
 
     while (true) {
         if (!captureFrame(cap, frame)) break;
 
-        // If ROI is not defined, select it
+        // Si el ROI no está definido, seleccionarlo
         if (!roiDefined) {
             roi = selectROI(frame);
-            // Check if ROI is valid
+            // Verificar si el ROI es válido
             if (roi.width <= 0 || roi.height <= 0 ||
                 roi.x < 0 || roi.y < 0 ||
                 (roi.x + roi.width) > frame.cols || (roi.y + roi.height) > frame.rows) {
@@ -451,7 +464,7 @@ int main() {
                 continue;
             } else {
                 roiDefined = true;
-                // Create the "Circle Detection" window after defining the ROI
+                // Crear la ventana después de definir el ROI
                 if (!windowCreated) {
                     cv::namedWindow("Circle Detection", cv::WINDOW_AUTOSIZE);
                     windowCreated = true;
@@ -459,29 +472,30 @@ int main() {
             }
         }
 
+        // Extraer el ROI del frame
         cv::Mat roiFrame = frame(roi);
 
-        // Process the frame
+        // Procesar el frame
         cv::Mat combinedSmallMask, combinedBigMask, mask_white;
         processFrame(roiFrame, params, colorRanges, combinedSmallMask, combinedBigMask, mask_white);
 
-        // Detect large circles
+        // Detectar círculos grandes (equipos)
         std::vector<cv::Vec3f> bigCircles = detectBigCircles(combinedBigMask, params);
 
-        // Detect and label the ball
+        // Detectar y etiquetar la pelota
         detectAndLabelBall(mask_white, roiFrame, params);
 
-        // Label the large and small circles
+        // Etiquetar los círculos grandes y pequeños (jugadores)
         labelObjects(bigCircles, combinedSmallMask, roiFrame, params, colorRanges[0].mask, colorRanges[2].mask, colorRanges);
 
-        // Calculate and display FPS in the console
+        // Calcular y mostrar FPS en la consola
         calculateAndDisplayFPS(frames, start);
 
-        // Display the processed frame
+        // Mostrar el frame procesado
         displayFrame(roiFrame);
     }
 
-    // Release the capture and close windows
+    // Liberar recursos
     cap.release();
     cv::destroyAllWindows();
     return 0;

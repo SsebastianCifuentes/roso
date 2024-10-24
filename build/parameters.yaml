@@ -1,4 +1,4 @@
-# Archivo de configuración de parametros
+# Archivo de configuración de parámetros
 
 camera:
   width: 1280
@@ -8,10 +8,10 @@ camera:
 
   # Parámetros de control de imagen
   brightness: 140          # Brillo 
-  contrast: 180           # Contraste 
-  saturation: 255         # Saturación 
-  sharpness: 200          # Nitidez 
-  gain: 0                 # Ganancia 
+  contrast: 180            # Contraste 
+  saturation: 255          # Saturación 
+  sharpness: 200           # Nitidez 
+  gain: 0                  # Ganancia 
   backlight_compensation: 0  # Compensación de luz de fondo
 
   # Parámetros de balance de blancos
@@ -20,7 +20,7 @@ camera:
 
   # Parámetros de exposición
   auto_exposure: 1       # Modo de exposición: 1 (manual), 3 (aperture priority)
-  exposure: 250          # Valor de exposición manual cuando `auto_exposure` está en 0
+  exposure: 250          # Valor de exposición manual cuando `auto_exposure` está en 1
   
   # Parámetros de enfoque
   auto_focus: false       
@@ -31,16 +31,16 @@ network:
   port: "5000"                     # Puerto para enviar los datos
 
 roi:
-  x: 120      # Coordenada X del ROI
-  y: 40      # Coordenada Y del ROI
-  width: 1022   # Ancho del ROI
-  height: 680  # Alto del ROI
+  x: 204      # Coordenada X del ROI
+  y: 10       # Coordenada Y del ROI
+  width: 971  # Ancho del ROI
+  height: 666 # Alto del ROI
 
 color:
   red:
     lower: [0, 130, 150]
     upper: [5, 255, 255]
-    lower2: [175, 150, 180]
+    lower2: [175, 130, 150]
     upper2: [179, 255, 255]
   blue:
     lower: [110, 150, 50]
@@ -49,29 +49,35 @@ color:
     lower: [25, 80, 180]
     upper: [35, 255, 255]
   green:
-    lower: [40, 80, 150]
-    upper: [85, 255, 255]
+    lower: [50, 80, 150]
+    upper: [90, 255, 255]
   skyblue:
-    lower: [95, 160, 200]
+    lower: [95, 150, 180]
     upper: [110, 255, 255]
   orange:
-    lower: [5, 140, 200]
-    upper: [23, 255, 255]
+    lower: [10, 140, 200]
+    upper: [30, 255, 255]
   white:
-    lower: [90, 10, 200]
-    upper: [105, 120, 255]
+    lower: [95, 10, 180]
+    upper: [110, 120, 255]
 
 hough:
-  dp: 1.0
-  min_dist: 30
-  param1_big: 50
-  param2_big: 15
-  min_radius_big: 25
-  max_radius_big: 30
+  dp: 1.0  # Relación de resolución entre imagen de entrada y el acumulador
+
+  min_dist_big: 30    # Distancia mínima entre los centros de los círculos grandes detectados
+  min_dist_small: 10  # Distancia mínima entre los centros de los círculos pequeños detectados
+  min_dist_ball: 25   # Distancia mínima entre los centros de las pelotas detectadas
+
+  param1_big: 50      # Umbral superior para detector de bordes en círculos grandes
+  param2_big: 15      # Umbral para detección de centros en círculos grandes
+  min_radius_big: 25  # Radio mínimo de círculos grandes a detectar
+  max_radius_big: 30  # Radio máximo de círculos grandes a detectar
+
   param1_small: 10
   param2_small: 5
   min_radius_small: 5
   max_radius_small: 10
+
   param1_ball: 50
   param2_ball: 10
   min_radius_ball: 7
@@ -80,8 +86,8 @@ hough:
 gaussian:
   kernel_size_big: 7
   kernel_size_medium: 5
-  kernel_size_small: 5
-  sigma: 2.0
+  kernel_size_small: 3
+  sigma: 1.0
 
 font_size:
   scale: 0.35

@@ -155,6 +155,33 @@ receiver/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/receiver.dir/build.make CMakeFiles/receiver.dir/build
 .PHONY : receiver/fast
 
+detection.pb.o: detection.pb.cc.o
+.PHONY : detection.pb.o
+
+# target to build an object file
+detection.pb.cc.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/roso.dir/build.make CMakeFiles/roso.dir/detection.pb.cc.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/receiver.dir/build.make CMakeFiles/receiver.dir/detection.pb.cc.o
+.PHONY : detection.pb.cc.o
+
+detection.pb.i: detection.pb.cc.i
+.PHONY : detection.pb.i
+
+# target to preprocess a source file
+detection.pb.cc.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/roso.dir/build.make CMakeFiles/roso.dir/detection.pb.cc.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/receiver.dir/build.make CMakeFiles/receiver.dir/detection.pb.cc.i
+.PHONY : detection.pb.cc.i
+
+detection.pb.s: detection.pb.cc.s
+.PHONY : detection.pb.s
+
+# target to generate assembly for a file
+detection.pb.cc.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/roso.dir/build.make CMakeFiles/roso.dir/detection.pb.cc.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/receiver.dir/build.make CMakeFiles/receiver.dir/detection.pb.cc.s
+.PHONY : detection.pb.cc.s
+
 src/calibration.o: src/calibration.cpp.o
 .PHONY : src/calibration.o
 
@@ -178,33 +205,6 @@ src/calibration.s: src/calibration.cpp.s
 src/calibration.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/calibration.dir/build.make CMakeFiles/calibration.dir/src/calibration.cpp.s
 .PHONY : src/calibration.cpp.s
-
-src/detection.pb.o: src/detection.pb.cc.o
-.PHONY : src/detection.pb.o
-
-# target to build an object file
-src/detection.pb.cc.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/roso.dir/build.make CMakeFiles/roso.dir/src/detection.pb.cc.o
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/receiver.dir/build.make CMakeFiles/receiver.dir/src/detection.pb.cc.o
-.PHONY : src/detection.pb.cc.o
-
-src/detection.pb.i: src/detection.pb.cc.i
-.PHONY : src/detection.pb.i
-
-# target to preprocess a source file
-src/detection.pb.cc.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/roso.dir/build.make CMakeFiles/roso.dir/src/detection.pb.cc.i
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/receiver.dir/build.make CMakeFiles/receiver.dir/src/detection.pb.cc.i
-.PHONY : src/detection.pb.cc.i
-
-src/detection.pb.s: src/detection.pb.cc.s
-.PHONY : src/detection.pb.s
-
-# target to generate assembly for a file
-src/detection.pb.cc.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/roso.dir/build.make CMakeFiles/roso.dir/src/detection.pb.cc.s
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/receiver.dir/build.make CMakeFiles/receiver.dir/src/detection.pb.cc.s
-.PHONY : src/detection.pb.cc.s
 
 src/receiver.o: src/receiver.cpp.o
 .PHONY : src/receiver.o
@@ -265,12 +265,12 @@ help:
 	@echo "... calibration"
 	@echo "... receiver"
 	@echo "... roso"
+	@echo "... detection.pb.o"
+	@echo "... detection.pb.i"
+	@echo "... detection.pb.s"
 	@echo "... src/calibration.o"
 	@echo "... src/calibration.i"
 	@echo "... src/calibration.s"
-	@echo "... src/detection.pb.o"
-	@echo "... src/detection.pb.i"
-	@echo "... src/detection.pb.s"
 	@echo "... src/receiver.o"
 	@echo "... src/receiver.i"
 	@echo "... src/receiver.s"

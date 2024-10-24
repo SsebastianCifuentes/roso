@@ -1,5 +1,6 @@
 #include <iostream>
 #include <boost/asio.hpp>
+#include <chrono> // Para medir el tiempo
 #include "detection.pb.h" // Incluir el archivo generado por Protobuf
 
 int main() {
@@ -26,6 +27,10 @@ int main() {
 
         std::cout << "Escuchando en " << multicast_address << ":" << port << std::endl;
 
+        // Variables para el conteo de mensajes y el cálculo de mensajes por segundo
+        int message_count = 0;
+        auto start_time = std::chrono::steady_clock::now();
+
         while (true) {
             char data[1024];
             boost::asio::ip::udp::endpoint sender_endpoint;
@@ -34,6 +39,9 @@ int main() {
             // Deserializar el mensaje Protobuf
             detection::DetectedObject obj;
             if (obj.ParseFromArray(data, length)) {
+                // Incrementar el contador de mensajes
+                message_count++;
+
                 if (obj.type() == detection::DetectedObject::ROBOT) {
                     std::string team = obj.team() == 1 ? "Equipo Rojo" : obj.team() == 2 ? "Equipo Azul" : "Desconocido";
                     std::cout << "Robot detectado: ";
@@ -47,6 +55,18 @@ int main() {
                 }
             } else {
                 std::cerr << "Error al deserializar el mensaje Protobuf" << std::endl;
+            }
+
+            // Calcular el tiempo transcurrido
+            auto current_time = std::chrono::steady_clock::now();
+            std::chrono::duration<double> elapsed_seconds = current_time - start_time;
+            if (elapsed_seconds.count() >= 1.0) {
+                // Mostrar mensajes por segundo
+                double messages_per_second = message_count / elapsed_seconds.count();
+                std::cout << "Mensajes por segundo: " << messages_per_second << std::endl;
+                // Resetear contador y tiempo
+                message_count = 0;
+                start_time = current_time;
             }
         }
     } catch (std::exception& e) {

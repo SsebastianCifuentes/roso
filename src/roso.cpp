@@ -59,10 +59,16 @@ struct DetectionParameters {
     cv::Scalar LOWER_WHITE, UPPER_WHITE;
 
     // Parámetros de HoughCircles
-    double DP, MIN_DIST;
+    double DP;
+    // Parámetros min_dist separados para cada tipo de círculo
+    double MIN_DIST_BIG;
+    double MIN_DIST_SMALL;
+    double MIN_DIST_BALL;
     int PARAM1_BIG, PARAM2_BIG, MIN_RADIUS_BIG, MAX_RADIUS_BIG;
     int PARAM1_SMALL, PARAM2_SMALL, MIN_RADIUS_SMALL, MAX_RADIUS_SMALL;
     int PARAM1_BALL, PARAM2_BALL, MIN_RADIUS_BALL, MAX_RADIUS_BALL;
+
+    // Nuevos parámetros de kernel
     int KERNELSIZEBIG, KERNELSIZEMEDIUM, KERNELSIZESMALL;
     double SIGMA;
 
@@ -136,7 +142,11 @@ DetectionParameters loadParameters(const std::string& filename) {
 
         // Parámetros de HoughCircles
         params.DP = config["hough"]["dp"].as<double>();
-        params.MIN_DIST = config["hough"]["min_dist"].as<double>();
+
+        // Parámetros min_dist separados para cada tipo de círculo
+        params.MIN_DIST_BIG = config["hough"]["min_dist_big"].as<double>();
+        params.MIN_DIST_SMALL = config["hough"]["min_dist_small"].as<double>();
+        params.MIN_DIST_BALL = config["hough"]["min_dist_ball"].as<double>();
 
         params.PARAM1_BIG = config["hough"]["param1_big"].as<int>();
         params.PARAM2_BIG = config["hough"]["param2_big"].as<int>();
@@ -153,10 +163,10 @@ DetectionParameters loadParameters(const std::string& filename) {
         params.MIN_RADIUS_BALL = config["hough"]["min_radius_ball"].as<int>();
         params.MAX_RADIUS_BALL = config["hough"]["max_radius_ball"].as<int>();
 
+        // Nuevos parámetros de kernel
         params.KERNELSIZEBIG = config["gaussian"]["kernel_size_big"].as<int>();
         params.KERNELSIZEMEDIUM = config["gaussian"]["kernel_size_medium"].as<int>();
         params.KERNELSIZESMALL = config["gaussian"]["kernel_size_small"].as<int>();
-
         params.SIGMA = config["gaussian"]["sigma"].as<double>();
 
         // Cargar los parámetros del ROI
@@ -274,21 +284,21 @@ void processFrame(const cv::Mat& roiFrame, const DetectionParameters& params,
 // Detectar círculos grandes (equipos)
 std::vector<cv::Vec3f> detectBigCircles(const cv::Mat& combinedBigMask, const DetectionParameters& params) {
     std::vector<cv::Vec3f> bigCircles;
-    cv::HoughCircles(combinedBigMask, bigCircles, cv::HOUGH_GRADIENT, params.DP, params.MIN_DIST, params.PARAM1_BIG, params.PARAM2_BIG, params.MIN_RADIUS_BIG, params.MAX_RADIUS_BIG);
+    cv::HoughCircles(combinedBigMask, bigCircles, cv::HOUGH_GRADIENT, params.DP, params.MIN_DIST_BIG, params.PARAM1_BIG, params.PARAM2_BIG, params.MIN_RADIUS_BIG, params.MAX_RADIUS_BIG);
     return bigCircles;
 }
 
 // Detectar círculos pequeños (jugadores) dentro de un círculo grande
 std::vector<cv::Vec3f> detectSmallCircles(const cv::Mat& roiMask, const DetectionParameters& params) {
     std::vector<cv::Vec3f> smallCircles;
-    cv::HoughCircles(roiMask, smallCircles, cv::HOUGH_GRADIENT, params.DP, params.MIN_DIST, params.PARAM1_SMALL, params.PARAM2_SMALL, params.MIN_RADIUS_SMALL, params.MAX_RADIUS_SMALL);
+    cv::HoughCircles(roiMask, smallCircles, cv::HOUGH_GRADIENT, params.DP, params.MIN_DIST_SMALL, params.PARAM1_SMALL, params.PARAM2_SMALL, params.MIN_RADIUS_SMALL, params.MAX_RADIUS_SMALL);
     return smallCircles;
 }
 
 // Detectar y preparar datos de la pelota
 void detectBall(const cv::Mat& mask_white, std::vector<detection::DetectedObject>& detectedObjects, const DetectionParameters& params) {
     std::vector<cv::Vec3f> whiteCircles;
-    cv::HoughCircles(mask_white, whiteCircles, cv::HOUGH_GRADIENT, params.DP, params.MIN_DIST, params.PARAM1_BALL, params.PARAM2_BALL, params.MIN_RADIUS_BALL, params.MAX_RADIUS_BALL);
+    cv::HoughCircles(mask_white, whiteCircles, cv::HOUGH_GRADIENT, params.DP, params.MIN_DIST_BALL, params.PARAM1_BALL, params.PARAM2_BALL, params.MIN_RADIUS_BALL, params.MAX_RADIUS_BALL);
     if (!whiteCircles.empty()) {
         cv::Point center(cvRound(whiteCircles[0][0]), cvRound(whiteCircles[0][1]));
 

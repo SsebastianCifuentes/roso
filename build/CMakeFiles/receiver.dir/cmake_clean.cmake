@@ -1,10 +1,10 @@
 file(REMOVE_RECURSE
-  "/home/robosoccer/roso/src/detection.pb.cc"
-  "/home/robosoccer/roso/src/detection.pb.h"
-  "CMakeFiles/receiver.dir/src/detection.pb.cc.o"
-  "CMakeFiles/receiver.dir/src/detection.pb.cc.o.d"
+  "CMakeFiles/receiver.dir/detection.pb.cc.o"
+  "CMakeFiles/receiver.dir/detection.pb.cc.o.d"
   "CMakeFiles/receiver.dir/src/receiver.cpp.o"
   "CMakeFiles/receiver.dir/src/receiver.cpp.o.d"
+  "detection.pb.cc"
+  "detection.pb.h"
   "receiver"
   "receiver.pdb"
 )

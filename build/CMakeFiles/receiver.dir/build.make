@@ -69,12 +69,13 @@ include CMakeFiles/receiver.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/receiver.dir/flags.make
 
-/home/robosoccer/roso/src/detection.pb.cc: /home/robosoccer/roso/src/detection.proto
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/robosoccer/roso/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generando archivos Protobuf para src/detection.proto"
-	/usr/bin/protoc --cpp_out=/home/robosoccer/roso/src -I /home/robosoccer/roso /home/robosoccer/roso/src/detection.proto
+detection.pb.h: /home/robosoccer/roso/src/detection.proto
+detection.pb.h: /usr/bin/protoc
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --blue --bold --progress-dir=/home/robosoccer/roso/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Running cpp protocol buffer compiler on src/detection.proto"
+	/usr/bin/protoc --cpp_out :/home/robosoccer/roso/build -I /home/robosoccer/roso/src /home/robosoccer/roso/src/detection.proto
 
-/home/robosoccer/roso/src/detection.pb.h: /home/robosoccer/roso/src/detection.pb.cc
-	@$(CMAKE_COMMAND) -E touch_nocreate /home/robosoccer/roso/src/detection.pb.h
+detection.pb.cc: detection.pb.h
+	@$(CMAKE_COMMAND) -E touch_nocreate detection.pb.cc
 
 CMakeFiles/receiver.dir/src/receiver.cpp.o: CMakeFiles/receiver.dir/flags.make
 CMakeFiles/receiver.dir/src/receiver.cpp.o: /home/robosoccer/roso/src/receiver.cpp
@@ -90,35 +91,33 @@ CMakeFiles/receiver.dir/src/receiver.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/receiver.dir/src/receiver.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/robosoccer/roso/src/receiver.cpp -o CMakeFiles/receiver.dir/src/receiver.cpp.s
 
-CMakeFiles/receiver.dir/src/detection.pb.cc.o: CMakeFiles/receiver.dir/flags.make
-CMakeFiles/receiver.dir/src/detection.pb.cc.o: /home/robosoccer/roso/src/detection.pb.cc
-CMakeFiles/receiver.dir/src/detection.pb.cc.o: CMakeFiles/receiver.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/robosoccer/roso/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/receiver.dir/src/detection.pb.cc.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/receiver.dir/src/detection.pb.cc.o -MF CMakeFiles/receiver.dir/src/detection.pb.cc.o.d -o CMakeFiles/receiver.dir/src/detection.pb.cc.o -c /home/robosoccer/roso/src/detection.pb.cc
+CMakeFiles/receiver.dir/detection.pb.cc.o: CMakeFiles/receiver.dir/flags.make
+CMakeFiles/receiver.dir/detection.pb.cc.o: detection.pb.cc
+CMakeFiles/receiver.dir/detection.pb.cc.o: CMakeFiles/receiver.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/robosoccer/roso/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/receiver.dir/detection.pb.cc.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/receiver.dir/detection.pb.cc.o -MF CMakeFiles/receiver.dir/detection.pb.cc.o.d -o CMakeFiles/receiver.dir/detection.pb.cc.o -c /home/robosoccer/roso/build/detection.pb.cc
 
-CMakeFiles/receiver.dir/src/detection.pb.cc.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/receiver.dir/src/detection.pb.cc.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/robosoccer/roso/src/detection.pb.cc > CMakeFiles/receiver.dir/src/detection.pb.cc.i
+CMakeFiles/receiver.dir/detection.pb.cc.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/receiver.dir/detection.pb.cc.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/robosoccer/roso/build/detection.pb.cc > CMakeFiles/receiver.dir/detection.pb.cc.i
 
-CMakeFiles/receiver.dir/src/detection.pb.cc.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/receiver.dir/src/detection.pb.cc.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/robosoccer/roso/src/detection.pb.cc -o CMakeFiles/receiver.dir/src/detection.pb.cc.s
+CMakeFiles/receiver.dir/detection.pb.cc.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/receiver.dir/detection.pb.cc.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/robosoccer/roso/build/detection.pb.cc -o CMakeFiles/receiver.dir/detection.pb.cc.s
 
 # Object files for target receiver
 receiver_OBJECTS = \
 "CMakeFiles/receiver.dir/src/receiver.cpp.o" \
-"CMakeFiles/receiver.dir/src/detection.pb.cc.o"
+"CMakeFiles/receiver.dir/detection.pb.cc.o"
 
 # External object files for target receiver
 receiver_EXTERNAL_OBJECTS =
 
 receiver: CMakeFiles/receiver.dir/src/receiver.cpp.o
-receiver: CMakeFiles/receiver.dir/src/detection.pb.cc.o
+receiver: CMakeFiles/receiver.dir/detection.pb.cc.o
 receiver: CMakeFiles/receiver.dir/build.make
 receiver: /usr/lib/x86_64-linux-gnu/libboost_system.so.1.83.0
-receiver: /usr/lib/x86_64-linux-gnu/libboost_thread.so.1.83.0
 receiver: /usr/lib/x86_64-linux-gnu/libprotobuf.so
-receiver: /usr/lib/x86_64-linux-gnu/libboost_atomic.so.1.83.0
 receiver: /usr/lib/gcc/x86_64-linux-gnu/13/libgomp.so
 receiver: /usr/lib/x86_64-linux-gnu/libpthread.a
 receiver: CMakeFiles/receiver.dir/link.txt
@@ -133,8 +132,8 @@ CMakeFiles/receiver.dir/clean:
 	$(CMAKE_COMMAND) -P CMakeFiles/receiver.dir/cmake_clean.cmake
 .PHONY : CMakeFiles/receiver.dir/clean
 
-CMakeFiles/receiver.dir/depend: /home/robosoccer/roso/src/detection.pb.cc
-CMakeFiles/receiver.dir/depend: /home/robosoccer/roso/src/detection.pb.h
+CMakeFiles/receiver.dir/depend: detection.pb.cc
+CMakeFiles/receiver.dir/depend: detection.pb.h
 	cd /home/robosoccer/roso/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/robosoccer/roso /home/robosoccer/roso /home/robosoccer/roso/build /home/robosoccer/roso/build /home/robosoccer/roso/build/CMakeFiles/receiver.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/receiver.dir/depend
 
