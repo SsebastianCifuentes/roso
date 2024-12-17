@@ -41,10 +41,12 @@ Para realizar la calibración, el procedimiento consiste en capturar diferentes 
 > En la página los valores en HSV deben estar de H: 0-360, S: 0-255, V: 0-255 ya que así es más fácil trabajarlos. Adicionalmente la escala que usa OpenCV para los valores de HSV es distinta, donde recomiendo revisar el siguiente enlace [OpenCV: Changing Colorspaces](https://docs.opencv.org/3.4/df/d9d/tutorial_py_colorspaces.html).
 
 ## Instalación
+```
 git clone https://github.com/SsebastianCifuentes/roso.git
 cd repo/build
 make
 ./calibration
+```
 
 ## Ejecución del algoritmo
 1. Conectar la cámara web al computador a utilizar.
